@@ -14,3 +14,5 @@ exports.pedidos = async (req, res) => {
   const { rows } = await client.query("SELECT pedido_id, fecha_pedido, entregado, usuario_id la_pasiva_pedidos");
   return res.send(rows);
 };
+
+
