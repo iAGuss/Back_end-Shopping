@@ -6,7 +6,7 @@ const client = new Pool({
   });
 
 exports.comidas = async (req, res) => {
-  const { rows } = await client.query("SELECT comida_id, comida, descripcion, precio, oferta FROM la_pasiva");
+  const { rows } = await client.query("SELECT comida_id, comida, categoria, descripcion, precio, oferta FROM la_pasiva");
   return res.send(rows);
 };
 
