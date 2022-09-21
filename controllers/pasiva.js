@@ -1,9 +1,4 @@
-const { Pool } = require("pg");
-const client = new Pool({
-  database: "Shopping",
-  password: "apka",
-  user: "postgres",
-});
+const { client } = require("../Database/database");
 
 // GETS:
 
@@ -77,29 +72,35 @@ exports.pedidoEntregado = async (req, res) => {
   res.sendStatus(200);
 };
 
-// exports.agregarPedido = async (req, res) => {
-//   try {
-//     const nuevoPedido = {
-//       pedido_id: req.body.pedido_id,
-//       comida_id: req.body.comida_id,
-//     };
+exports.agregarPedido = async (req, res) => {
+  try {
+    const nuevoPedido = {
+      usuario_id: req.body.usuario_id,
+      comida_id: req.body.comida_id,
+    };
 
-//     await client.query(
-//       `INSERT INTO public.la_pasiva_pedidos(
-//         pedido_id, comida_id)
-//         VALUES ($1, $2);`,
-//       [nuevoPedido.pedido_id, nuevoPedido.comida_id]
-//     );
+    const { rows } = await client.query(
+      `INSERT INTO public.la_pasiva_pedido_usuario(
+        usuario_id)
+        VALUES ($1) returning pedido_id;`,
+      [nuevoPedido.usuario_id]
+    );
 
-//     await client.query(
-//       `INSERT INTO public.la_pasiva_pedido_usuario`
-//     )
+    const id = rows[0].pedido_id;
 
-//     return res.json({ success: true, nuevoPedido });
-//   } catch (error) {
-//     res.status(500).json({ error: error });
-//   }
-// };
+    for (let i = 0; i < nuevoPedido.comida_id.length; i++) {
+      await client.query(
+        `INSERT INTO public.la_pasiva_pedidos(pedido_id, comida_id)
+          VALUES ($1, $2);`,
+        [id, nuevoPedido.comida_id[i]]
+      );
+    }
+
+    return res.json({ success: true, nuevoPedido });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
 
 // POSTS:
 
@@ -136,17 +137,22 @@ exports.agregarComida = async (req, res) => {
 
 exports.comidaOferta = async (req, res) => {
   const { comida_id } = req.params;
-  // const { rows } = await client.query(
-  //   `SELECT oferta FROM public.la_pasiva WHERE comida_id=$1`
-  // );
-  await client.query(
-    `UPDATE public.la_pasiva SET oferta=$1, precio=$2 WHERE comida_id=$3`,
-    [req.body.oferta, req.body.precio, comida_id]
+  const { rows } = await client.query(
+    `SELECT oferta, precio FROM public.la_pasiva_comidas WHERE comida_id=$1`,
+    [comida_id]
   );
-  res.sendStatus(200);
-  // if (rows[0] === req.body.oferta) {
-  //   res.send("No se aplicaron cambios");
-  // } else res.sendStatus(200);
+  if (
+    rows[0].oferta === req.body.oferta ||
+    rows[0].precio === req.body.precio
+  ) {
+    res.send("No se aplicaron cambios");
+  } else {
+    await client.query(
+      `UPDATE public.la_pasiva_comidas SET oferta=$1, precio=$2 WHERE comida_id=$3`,
+      [req.body.oferta, req.body.precio, comida_id]
+    );
+    res.sendStatus(200);
+  }
 };
 
 // DELETES:
@@ -158,4 +164,24 @@ exports.eliminarComida = async (req, res) => {
     [comida_id]
   ),
     res.sendStatus(200);
+};
+
+exports.eliminarPedido = async (req, res) => {
+  try {
+    const { rows } = await client.query(
+      "SELECT pedido_id FROM la_pasiva_pedidos WHERE entregado = true"
+    );
+
+    await client.query("DELETE FROM la_pasiva_pedidos WHERE entregado = true");
+
+    for (let i = 0; i < rows.length; i++) {
+      await client.query(
+        "DELETE FROM la_pasiva_pedido_usuario WHERE pedido_id=$1",
+        [parseInt(rows[i])]
+      );
+    }
+    res.send(200);
+  } catch (error) {
+    res.send(error);
+  }
 };

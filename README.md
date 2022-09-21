@@ -1,4 +1,15 @@
 Rutas:
+/// Shopping
+
+// GET:
+
+// Usuarios:
+
+- Lista de usuarios: /usuarios
+
+// POST:
+
+- Agregar usuario: /agregarUsuario
 
 /// La pasiva:
 
@@ -25,7 +36,7 @@ Rutas:
 
 // Pedidos:
 
-- Agregar pedido:
+- Agregar pedido: /pasiva/agregarPedido
 
 // PUT:
 
@@ -39,3 +50,7 @@ Rutas:
 // Comidas:
 
 - Eliminar comidas por id: /pasiva/eliminarComida/:comida_id
+
+// Pedidos:
+
+- Eliminar pedidos entregados: /pasiva/eliminarPedido
