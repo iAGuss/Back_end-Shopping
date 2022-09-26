@@ -27,7 +27,7 @@ router.get("/pasiva/pedidos/:pedido_id", pedidoPorId);
 router.get("/pasiva/pedidosNoEntregados", pedidosNoEntregados);
 
 router.post("/pasiva/agregarComida", verifyToken, agregarComida);
-router.post("/pasiva/agregarPedido", verifyToken, agregarPedido);
+router.post("/pasiva/agregarPedido", agregarPedido);
 
 router.put("/pasiva/comidaOferta/:comida_id", verifyToken, comidaOferta);
 

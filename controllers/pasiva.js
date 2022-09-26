@@ -77,6 +77,8 @@ exports.agregarPedido = async (req, res) => {
     const nuevoPedido = {
       usuario_id: req.body.usuario_id,
       comida_id: req.body.comida_id,
+      fecha: req.body.fecha,
+      direccion: req.body.direccion,
     };
 
     const { rows } = await client.query(
@@ -90,9 +92,9 @@ exports.agregarPedido = async (req, res) => {
 
     for (let i = 0; i < nuevoPedido.comida_id.length; i++) {
       await client.query(
-        `INSERT INTO public.la_pasiva_pedidos(pedido_id, comida_id)
-          VALUES ($1, $2);`,
-        [id, nuevoPedido.comida_id[i]]
+        `INSERT INTO public.la_pasiva_pedidos(pedido_id, comida_id, fecha, direccion)
+          VALUES ($1, $2, $3, $4);`,
+        [id, nuevoPedido.comida_id[i], nuevoPedido.fecha, nuevoPedido.direccion]
       );
     }
 
